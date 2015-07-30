@@ -149,6 +149,9 @@ blocks.mouseDown = function(event) {
             var x = object.data.position.x;
             var y = object.data.position.y;
 
+            var movingBlocks = [];
+            var addBlocks = false;
+
             var script = object.content;
             script.forEach(function (object) {
                 var block_y = y + (blocks.defaultHeight * index);
@@ -159,24 +162,30 @@ blocks.mouseDown = function(event) {
                 if (mouseX > block_x && mouseX < block_x + width) {
                     if (mouseY > block_y && mouseY < block_y + height) {
                         console.log("Block clicked!!");
-
-                        var newscript = {
-                            data: {
-                                position: {
-                                    x: 400,
-                                    y: 100
-                                }
-                            },
-                            content: []
-                        };
-                        newscript.content.push(object);
-
-                        blocks.scripts.push(newscript);
-                        blocks.render();
-                        blocks.moving = true;
+                        addBlocks = true;
                     }
                 }
+                if (addBlocks == true){
+                    movingBlocks.push(object);
+                }
             });
+
+            if (addBlocks == true) {
+                var newscript = {
+                    data: {
+                        position: {
+                            x: 400,
+                            y: 100
+                        }
+                    },
+                    content: []
+                };
+                newscript.content = movingBlocks;
+
+                blocks.scripts.push(newscript);
+                blocks.render();
+                blocks.moving = true;
+            }
         });
     }
 };
