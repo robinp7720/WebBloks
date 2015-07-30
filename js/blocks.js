@@ -317,6 +317,7 @@ blocks.render = function() {
 
         var hIndex = blocks.defaultHeight;
         var content = script.content;
+
         content.forEach(function(obj){
             if ('content' in obj) {
                 blocks.renderCblock(x - ui.rightPanel.width + 20, y + hIndex, obj.data.id, obj.content);
@@ -345,8 +346,8 @@ blocks.mouseDown = function(event) {
             var new_content = [];
             var addBlocks = false;
 
-            var script = object.content;
-            blocks.onClickChild(mouseX, mouseY, x, y, object.content);
+            blocks.scripts[scriptId].content = blocks.onClickChild(mouseX, mouseY, x, y, object.content)
+            //console.log(blocks.onClickChild(mouseX, mouseY, x, y, object.content));
 
         });
     }
@@ -354,14 +355,15 @@ blocks.mouseDown = function(event) {
 
 blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
     var index = 0;
-    var nextBlocks = []
+    var nextBlocks = [];
     var addBlocks = false;
+    var newContent = [];
     content.forEach(function(obj,key){
         var y = blockY + index;
         var x = blockX;
         if (addBlocks === false) {
             if ('content' in obj) {
-                blocks.onClickChild(mouseX, mouseY, x + 20, y + blocks.defaultHeight, obj.content);
+                obj.content = blocks.onClickChild(mouseX, mouseY, x + 20, y + blocks.defaultHeight, obj.content);
                 index += blocks.getHeightC(obj.content);
                 index += blocks.defaultHeight;
             }
@@ -374,15 +376,17 @@ blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
             if (mouseY > y && mouseY < y + height) {
                 console.log("Block clicked!!");
                 addBlocks = true;
-                console.log(obj);
             }
         }
 
         if(addBlocks){
             nextBlocks.push(obj);
+        }else{
+            newContent.push(obj);
         }
 
         index+= blocks.defaultHeight;
+        console.log(newContent);
 
     });
 
@@ -405,6 +409,7 @@ blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
         blocks.render();
         blocks.moving = true;
     }
+    return newContent;
 };
 
 blocks.mouseMove = function(event) {
