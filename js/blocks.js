@@ -10,14 +10,22 @@ blocks.defaultHeight = 30;
 
 blocks.colours = {
   control: '#ff6666',
-  other: '#00ff00'
+  other: '#66ff66'
 };
 
 blocks.blocks = {
-  1: {
-    cat: "control",
-    text: '<meta name="%s" content="%s">'
-  }
+    1: {
+        cat: "control",
+        text: '<meta name="%s" content="%s">'
+    },
+    2:{
+        cat: "control",
+        text: '<title></title>'
+    },
+    3:{
+        cat: "other",
+        text: '<test></test>'
+    }
 };
 
 
@@ -34,6 +42,24 @@ blocks.scripts = [
                 data: {
                     type: 'block', //Block data type
                     id: 1 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 2 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 3 //How ever we want to identify blocks
                 },
                 inputs: {
                     1: "test" //Can be a block object or string or what ever data type the input is.
@@ -95,12 +121,14 @@ blocks.drawBlock = function(x,y,blockId){
 
 blocks.render = function() {
     blocks.scripts.forEach(function(object){
+        var index = 0;
         var x = object.data.position.x;
         var y = object.data.position.y;
 
         var script = object.content;
         script.forEach(function(object){
-            console.log(object);
+            blocks.drawBlock(x, y + (blocks.defaultHeight * index),object.data.id);
+            index++;
         });
     });
 };
