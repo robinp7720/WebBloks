@@ -66,7 +66,34 @@ blocks.scripts = [
                 inputs: {
                     1: "test" //Can be a block object or string or what ever data type the input is.
                 }
-            }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 1 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 2 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 3 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
         ]
     }
 ];
@@ -177,8 +204,8 @@ blocks.mouseDown = function(event) {
                 var newscript = {
                     data: {
                         position: {
-                            x: 400,
-                            y: 100
+                            x: mouseX,
+                            y: mouseY
                         }
                     },
                     content: []
@@ -205,5 +232,34 @@ blocks.mouseMove = function(event) {
 };
 
 blocks.mouseUp = function(event){
-  blocks.moving = false;
+    var mouseX = event.clientX - ui.rightPanel.width;
+    var mouseY = event.clientY;
+    blocks.moving = false;
+
+    ui.drawEditor();
+    blocks.scripts.forEach(function(object,scriptId){
+        var index = 0;
+        var x = object.data.position.x;
+        var y = object.data.position.y;
+
+        var script = object.content;
+        script.forEach(function(object,key){
+            var block_y = y + (blocks.defaultHeight * index);
+            var block_x = x;
+            var height = blocks.defaultHeight;
+            var width = (blocks.blocks[object.data.id].text.length + 1) * 11;
+            index++;
+            if (mouseX > block_x && mouseX < block_x + width) {
+                if (mouseY > block_y && mouseY < block_y + height) {
+                    console.log("Block dropped!");
+                    blocks.scripts[blocks.scripts.length - 1].content.forEach(function(object,count){
+                        blocks.scripts[scriptId].content.splice(key+count+1,0,object);
+                    });
+                    delete blocks.scripts[blocks.scripts.length - 1];
+
+                }
+            }
+        });
+    });
+    blocks.render();
 };
