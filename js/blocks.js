@@ -354,13 +354,17 @@ blocks.mouseDown = function(event) {
 
 blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
     var index = 0;
+    var nextBlocks = []
+    var addBlocks = false;
     content.forEach(function(obj,key){
         var y = blockY + index;
         var x = blockX;
-        if ('content' in obj){
-            blocks.onClickChild(mouseX, mouseY, x+20, y + blocks.defaultHeight, obj.content);
-            index += blocks.getHeightC(obj.content);
-            index+= blocks.defaultHeight;
+        if (addBlocks === false) {
+            if ('content' in obj) {
+                blocks.onClickChild(mouseX, mouseY, x + 20, y + blocks.defaultHeight, obj.content);
+                index += blocks.getHeightC(obj.content);
+                index += blocks.defaultHeight;
+            }
         }
 
         var height = blocks.defaultHeight;
@@ -369,13 +373,38 @@ blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
         if (mouseX > x && mouseX < x + width) {
             if (mouseY > y && mouseY < y + height) {
                 console.log("Block clicked!!");
+                addBlocks = true;
                 console.log(obj);
             }
+        }
+
+        if(addBlocks){
+            nextBlocks.push(obj);
         }
 
         index+= blocks.defaultHeight;
 
     });
+
+    /* Create new script with blocks under clicked block */
+    if (addBlocks){
+        console.log(nextBlocks);
+
+        var newscript = {
+            data: {
+                position: {
+                    x: mouseX,
+                    y: mouseY
+                }
+            },
+            content: []
+        };
+        newscript.content = nextBlocks;
+
+        blocks.scripts.push(newscript);
+        blocks.render();
+        blocks.moving = true;
+    }
 };
 
 blocks.mouseMove = function(event) {
