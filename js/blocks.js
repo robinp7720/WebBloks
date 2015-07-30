@@ -6,6 +6,8 @@ blocks.style = {}
 blocks.style.puzzle = {};
 blocks.style.puzzle.width = 20;
 
+blocks.moving = false;
+
 blocks.defaultHeight = 30;
 
 blocks.colours = {
@@ -70,7 +72,9 @@ blocks.scripts = [
 ];
 
 blocks.init = function() {
-  document.addEventListener('mousedown',this.mouseDown);
+    document.addEventListener('mousedown',this.mouseDown);
+    document.addEventListener('mousemove',this.mouseMove);
+    document.addEventListener('mouseup',this.mouseUp);
     this.render();
 };
 
@@ -110,9 +114,10 @@ blocks.drawBlock = function(x,y,blockId){
     path.lineTo(x,y+2);
     path.lineTo(x+2,y);
 
-    this.ctx.stroke(path);
     this.ctx.fillStyle = this.colours[this.blocks[blockId].cat];
     this.ctx.fill(path);
+
+    this.ctx.stroke(path);
 
     this.ctx.font = "20px Consolas";
     this.ctx.fillStyle = 'black';
@@ -120,6 +125,7 @@ blocks.drawBlock = function(x,y,blockId){
 };
 
 blocks.render = function() {
+    ui.drawEditor();
     blocks.scripts.forEach(function(object){
         var index = 0;
         var x = object.data.position.x;
@@ -134,6 +140,57 @@ blocks.render = function() {
 };
 
 blocks.mouseDown = function(event) {
-    blocks.drawBlock(event.clientX - ui.rightPanel.width,event.clientY,1);
-    console.log("test");
+    if (blocks.moving === false) {
+        var mouseX = event.clientX - ui.rightPanel.width;
+        var mouseY = event.clientY;
+        blocks.render();
+        blocks.scripts.forEach(function (object) {
+            var index = 0;
+            var x = object.data.position.x;
+            var y = object.data.position.y;
+
+            var script = object.content;
+            script.forEach(function (object) {
+                var block_y = y + (blocks.defaultHeight * index);
+                var block_x = x;
+                var height = blocks.defaultHeight;
+                var width = (blocks.blocks[object.data.id].text.length + 1) * 11;
+                index++;
+                if (mouseX > block_x && mouseX < block_x + width) {
+                    if (mouseY > block_y && mouseY < block_y + height) {
+                        console.log("Block clicked!!");
+
+                        var newscript = {
+                            data: {
+                                position: {
+                                    x: 400,
+                                    y: 100
+                                }
+                            },
+                            content: []
+                        };
+                        newscript.content.push(object);
+
+                        blocks.scripts.push(newscript);
+                        blocks.render();
+                        blocks.moving = true;
+                    }
+                }
+            });
+        });
+    }
+};
+blocks.mouseMove = function(event) {
+    if (blocks.moving === true) {
+        var mouseX = event.clientX - ui.rightPanel.width;
+        var mouseY = event.clientY;
+
+        blocks.scripts[blocks.scripts.length - 1].data.position.x = mouseX;
+        blocks.scripts[blocks.scripts.length - 1].data.position.y = mouseY;
+        blocks.render();
+    }
+};
+
+blocks.mouseUp = function(event){
+  blocks.moving = false;
 };
