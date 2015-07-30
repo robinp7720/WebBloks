@@ -104,9 +104,11 @@ blocks.init = function() {
     document.addEventListener('mouseup',this.mouseUp);
     this.render();
 };
-
-
 blocks.drawBlock = function(x,y,blockId){
+    this.drawNormalBlock(x,y,blockId);
+};
+
+blocks.drawNormalBlock = function(x,y,blockId){
     this.ctx = this.canvas.ctx;
     var block = this.blocks[blockId];
 
@@ -137,6 +139,79 @@ blocks.drawBlock = function(x,y,blockId){
 
     path.lineTo(x+2,y+height);
     path.lineTo(x,y+height -2);
+
+    path.lineTo(x,y+2);
+    path.lineTo(x+2,y);
+
+    this.ctx.fillStyle = this.colours[this.blocks[blockId].cat];
+    this.ctx.fill(path);
+
+    this.ctx.stroke(path);
+
+    this.ctx.font = "20px Consolas";
+    this.ctx.fillStyle = 'black';
+    this.ctx.fillText(block.text,x+5,y+22);
+};
+
+blocks.renderCblock = function(x,y,blockId,content){
+    this.ctx = this.canvas.ctx;
+    var block = this.blocks[blockId];
+
+    var width = (block.text.length+1) * 11;
+
+    var height = this.defaultHeight;
+    var contentHeight = height;
+    x += ui.rightPanel.width;
+
+    var path=new Path2D();
+
+
+    path.moveTo(x+2,y);
+    /* top puzzle of top bar */
+    path.lineTo(x+20,y);
+    path.lineTo(x+21,y+5);
+    path.lineTo(x+this.style.puzzle.width+21,y+5);
+    path.lineTo(x+this.style.puzzle.width+22,y);
+
+    path.lineTo(x+width,y);
+
+    path.lineTo(x+width+2,y+2);
+    path.lineTo(x+width+2,y+(height -2));
+    path.lineTo(x+width,y+height);
+
+
+    /* Bottom puzzle of top bar */
+    path.lineTo(x+this.style.puzzle.width+42,y+height);
+    path.lineTo(x+this.style.puzzle.width+41,y+height+5);
+    path.lineTo(x+41,y+height+5);
+    path.lineTo(x+40,y+height);
+
+    path.lineTo(x+16,y+height);
+    path.lineTo(x+14,y+height + 2);
+    path.lineTo(x+14,y+height+contentHeight-2);
+
+    path.lineTo(x+16,y+height+contentHeight);
+
+    /* Top puzzle of bottom bar */
+    path.lineTo(x+40,y+height+contentHeight);
+    path.lineTo(x+41,y+height+contentHeight+5);
+    path.lineTo(x+this.style.puzzle.width+41,y+height+contentHeight+5);
+    path.lineTo(x+this.style.puzzle.width+42,y+height+contentHeight);
+
+    path.lineTo(x+width,y+height+contentHeight);
+
+    path.lineTo(x+width+2,y+height+contentHeight+2);
+    path.lineTo(x+width+2,y+height+contentHeight+height -2);
+    path.lineTo(x+width,y+height+contentHeight+height);
+
+    /* Bottom puzzle of bottom bar */
+    path.lineTo(x+this.style.puzzle.width+22,y+height+contentHeight+height);
+    path.lineTo(x+this.style.puzzle.width+21,y+height+contentHeight+height+5);
+    path.lineTo(x+21,y+height+contentHeight+height+5);
+    path.lineTo(x+20,y+height+contentHeight+height);
+
+    path.lineTo(x+2,y+height+contentHeight+height);
+    path.lineTo(x,y+height+contentHeight+height -2);
 
     path.lineTo(x,y+2);
     path.lineTo(x+2,y);
