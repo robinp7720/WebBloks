@@ -56,25 +56,26 @@ blocks.scripts = [
                 },
                 inputs: {
                     1: "test" //Can be a block object or string or what ever data type the input is.
-                }
-            },
-            {
-                data: {
-                    type: 'block', //Block data type
-                    id: 3 //How ever we want to identify blocks
                 },
-                inputs: {
-                    1: "test" //Can be a block object or string or what ever data type the input is.
-                }
-            },
-            {
-                data: {
-                    type: 'block', //Block data type
-                    id: 1 //How ever we want to identify blocks
-                },
-                inputs: {
-                    1: "test" //Can be a block object or string or what ever data type the input is.
-                }
+                content: [
+                    {
+                        data: {
+                            type: 'block', //Block data type
+                            id: 2 //How ever we want to identify blocks
+                        },
+                        inputs: {
+                            1: "test" //Can be a block object or string or what ever data type the input is.
+                        }
+                    }, {
+                        data: {
+                            type: 'block', //Block data type
+                            id: 2 //How ever we want to identify blocks
+                        },
+                        inputs: {
+                            1: "test" //Can be a block object or string or what ever data type the input is.
+                        }
+                    },
+                ]
             },
             {
                 data: {
@@ -88,11 +89,60 @@ blocks.scripts = [
             {
                 data: {
                     type: 'block', //Block data type
-                    id: 3 //How ever we want to identify blocks
+                    id: 2 //How ever we want to identify blocks
                 },
                 inputs: {
                     1: "test" //Can be a block object or string or what ever data type the input is.
-                }
+                },
+                content: [
+                    {
+                        data: {
+                            type: 'block', //Block data type
+                            id: 2 //How ever we want to identify blocks
+                        },
+                        inputs: {
+                            1: "test" //Can be a block object or string or what ever data type the input is.
+                        }
+                    }, {
+                        data: {
+                            type: 'block', //Block data type
+                            id: 2 //How ever we want to identify blocks
+                        },
+                        inputs: {
+                            1: "test" //Can be a block object or string or what ever data type the input is.
+                        },
+                        content: [
+                            {
+                                data: {
+                                    type: 'block', //Block data type
+                                    id: 2 //How ever we want to identify blocks
+                                },
+                                inputs: {
+                                    1: "test" //Can be a block object or string or what ever data type the input is.
+                                },
+                                content: [
+                                    {
+                                        data: {
+                                            type: 'block', //Block data type
+                                            id: 2 //How ever we want to identify blocks
+                                        },
+                                        inputs: {
+                                            1: "test" //Can be a block object or string or what ever data type the input is.
+                                        }
+                                    }, {
+                                        data: {
+                                            type: 'block', //Block data type
+                                            id: 2 //How ever we want to identify blocks
+                                        },
+                                        inputs: {
+                                            1: "test" //Can be a block object or string or what ever data type the input is.
+                                        }
+                                    },
+                                ]
+                            },
+                        ]
+                    },
+                ]
             },
         ]
     }
@@ -256,15 +306,23 @@ blocks.renderCblock = function(x,y,blockId,content){
 
 blocks.render = function() {
     ui.drawEditor();
-    blocks.scripts.forEach(function(object){
+    blocks.scripts.forEach(function(script){
         var index = 0;
-        var x = object.data.position.x;
-        var y = object.data.position.y;
+        var x = script.data.position.x + ui.rightPanel.width - 20;
+        var y = script.data.position.y - blocks.defaultHeight;
 
-        var script = object.content;
-        script.forEach(function(object){
-            blocks.drawBlock(x, y + (blocks.defaultHeight * index),object.data.id);
-            index++;
+        var hIndex = blocks.defaultHeight;
+        var content = script.content;
+        content.forEach(function(obj){
+            if ('content' in obj) {
+                blocks.renderCblock(x - ui.rightPanel.width + 20, y + hIndex, obj.data.id, obj.content);
+                hIndex += blocks.defaultHeight;
+                hIndex+=blocks.getHeightC(obj.content);
+                hIndex += blocks.defaultHeight;
+            }else{
+                blocks.drawBlock(x - ui.rightPanel.width + 20, y + hIndex, obj.data.id);
+                hIndex += blocks.defaultHeight;
+            }
         });
     });
 };
