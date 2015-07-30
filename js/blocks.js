@@ -7,6 +7,10 @@ blocks.style.puzzle = {};
 blocks.style.puzzle.width = 20;
 
 blocks.moving = false;
+blocks.dragOffset = {
+    x:0,
+    y:0
+};
 
 blocks.defaultHeight = 30;
 
@@ -351,6 +355,7 @@ blocks.mouseDown = function(event) {
                 if (mouseX > block_x && mouseX < block_x + width) {
                     if (mouseY > block_y && mouseY < block_y + height) {
                         console.log("Block clicked!!");
+                        blocks.dragOffset.x = block_x - mouseX;
                         addBlocks = true;
                     }
                 }
@@ -383,8 +388,8 @@ blocks.mouseDown = function(event) {
 };
 blocks.mouseMove = function(event) {
     if (blocks.moving === true) {
-        var mouseX = event.clientX - ui.rightPanel.width;
-        var mouseY = event.clientY;
+        var mouseX = event.clientX - ui.rightPanel.width + blocks.dragOffset.x;
+        var mouseY = event.clientY - (blocks.defaultHeight / 2);
         /* Set min mouse posstions */
         if (mouseX < 1){
             mouseX = 1;
@@ -403,8 +408,8 @@ blocks.mouseMove = function(event) {
 
 blocks.mouseUp = function(event){
     if (blocks.moving) {
-        var mouseX = event.clientX - ui.rightPanel.width;
-        var mouseY = event.clientY;
+        var mouseX = event.clientX - ui.rightPanel.width + blocks.dragOffset.x;
+        var mouseY = event.clientY - (blocks.defaultHeight / 2);
         blocks.moving = false;
 
         ui.drawEditor();
