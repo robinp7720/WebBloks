@@ -6,18 +6,28 @@ blocks.style = {}
 blocks.style.puzzle = {};
 blocks.style.puzzle.width = 20;
 
+blocks.moving = false;
+
 blocks.defaultHeight = 30;
 
 blocks.colours = {
   control: '#ff6666',
-  other: '#00ff00'
+  other: '#66ff66'
 };
 
 blocks.blocks = {
-  1: {
-    cat: "control",
-    text: '<meta name="%s" content="%s">'
-  }
+    1: {
+        cat: "control",
+        text: '<meta name="%s" content="%s">'
+    },
+    2:{
+        cat: "control",
+        text: '<title></title>'
+    },
+    3:{
+        cat: "other",
+        text: '<test></test>'
+    }
 };
 
 
@@ -38,13 +48,60 @@ blocks.scripts = [
                 inputs: {
                     1: "test" //Can be a block object or string or what ever data type the input is.
                 }
-            }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 2 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 3 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 1 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 2 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
+            {
+                data: {
+                    type: 'block', //Block data type
+                    id: 3 //How ever we want to identify blocks
+                },
+                inputs: {
+                    1: "test" //Can be a block object or string or what ever data type the input is.
+                }
+            },
         ]
     }
 ];
 
 blocks.init = function() {
-  document.addEventListener('mousedown',this.mouseDown);
+    document.addEventListener('mousedown',this.mouseDown);
+    document.addEventListener('mousemove',this.mouseMove);
+    document.addEventListener('mouseup',this.mouseUp);
     this.render();
 };
 
@@ -84,9 +141,10 @@ blocks.drawBlock = function(x,y,blockId){
     path.lineTo(x,y+2);
     path.lineTo(x+2,y);
 
-    this.ctx.stroke(path);
     this.ctx.fillStyle = this.colours[this.blocks[blockId].cat];
     this.ctx.fill(path);
+
+    this.ctx.stroke(path);
 
     this.ctx.font = "20px Consolas";
     this.ctx.fillStyle = 'black';
@@ -94,18 +152,114 @@ blocks.drawBlock = function(x,y,blockId){
 };
 
 blocks.render = function() {
+    ui.drawEditor();
     blocks.scripts.forEach(function(object){
+        var index = 0;
         var x = object.data.position.x;
         var y = object.data.position.y;
 
         var script = object.content;
         script.forEach(function(object){
-            console.log(object);
+            blocks.drawBlock(x, y + (blocks.defaultHeight * index),object.data.id);
+            index++;
         });
     });
 };
 
 blocks.mouseDown = function(event) {
-    blocks.drawBlock(event.clientX - ui.rightPanel.width,event.clientY,1);
-    console.log("test");
+    if (blocks.moving === false) {
+        var mouseX = event.clientX - ui.rightPanel.width;
+        var mouseY = event.clientY;
+        blocks.render();
+        blocks.scripts.forEach(function (object,scriptId) {
+            var index = 0;
+            var x = object.data.position.x;
+            var y = object.data.position.y;
+
+            var movingBlocks = [];
+            var new_content = [];
+            var addBlocks = false;
+
+            var script = object.content;
+            script.forEach(function (object,key) {
+                var block_y = y + (blocks.defaultHeight * index);
+                var block_x = x;
+                var height = blocks.defaultHeight;
+                var width = (blocks.blocks[object.data.id].text.length + 1) * 11;
+                index++;
+                if (mouseX > block_x && mouseX < block_x + width) {
+                    if (mouseY > block_y && mouseY < block_y + height) {
+                        console.log("Block clicked!!");
+                        addBlocks = true;
+                    }
+                }
+                if (addBlocks == true){
+                    movingBlocks.push(object);
+                }else{
+                    new_content.push(object);
+                }
+            });
+
+            if (addBlocks == true) {
+                var newscript = {
+                    data: {
+                        position: {
+                            x: mouseX,
+                            y: mouseY
+                        }
+                    },
+                    content: []
+                };
+                newscript.content = movingBlocks;
+
+                blocks.scripts.push(newscript);
+                blocks.scripts[scriptId].content = new_content;
+                blocks.render();
+                blocks.moving = true;
+            }
+        });
+    }
+};
+blocks.mouseMove = function(event) {
+    if (blocks.moving === true) {
+        var mouseX = event.clientX - ui.rightPanel.width;
+        var mouseY = event.clientY;
+
+        blocks.scripts[blocks.scripts.length - 1].data.position.x = mouseX;
+        blocks.scripts[blocks.scripts.length - 1].data.position.y = mouseY;
+        blocks.render();
+    }
+};
+
+blocks.mouseUp = function(event){
+    var mouseX = event.clientX - ui.rightPanel.width;
+    var mouseY = event.clientY;
+    blocks.moving = false;
+
+    ui.drawEditor();
+    blocks.scripts.forEach(function(object,scriptId){
+        var index = 0;
+        var x = object.data.position.x;
+        var y = object.data.position.y;
+
+        var script = object.content;
+        script.forEach(function(object,key){
+            var block_y = y + (blocks.defaultHeight * index);
+            var block_x = x;
+            var height = blocks.defaultHeight;
+            var width = (blocks.blocks[object.data.id].text.length + 1) * 11;
+            index++;
+            if (mouseX > block_x && mouseX < block_x + width) {
+                if (mouseY > block_y && mouseY < block_y + height) {
+                    console.log("Block dropped!");
+                    blocks.scripts[blocks.scripts.length - 1].content.forEach(function(object,count){
+                        blocks.scripts[scriptId].content.splice(key+count+1,0,object);
+                    });
+                    delete blocks.scripts[blocks.scripts.length - 1];
+
+                }
+            }
+        });
+    });
+    blocks.render();
 };
