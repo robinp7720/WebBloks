@@ -155,15 +155,17 @@ blocks.drawNormalBlock = function(x,y,blockId){
 
 blocks.getHeightC = function(content){
     var height = 0;
-    content.forEach(function(obj){
-        if (obj.content === undefined){
-            height += blocks.defaultHeight;
-        }else{
-            height += blocks.defaultHeight;
-            height += blocks.getHeightC(obj.content);
-            height += blocks.defaultHeight;
-        }
-    });
+    if (content != undefined) {
+        content.forEach(function (obj) {
+            if ('content' in obj) {
+                height += blocks.defaultHeight;
+                height += blocks.getHeightC(obj.content);
+                height += blocks.defaultHeight;
+            } else {
+                height += blocks.defaultHeight;
+            }
+        });
+    }
     return height;
 };
 
@@ -174,7 +176,7 @@ blocks.renderCblock = function(x,y,blockId,content){
     var width = (block.text.length+1) * 11;
 
     var height = this.defaultHeight;
-    var contentHeight =this.getHeightC(content);
+    var contentHeight = this.getHeightC(content);
     x += ui.rightPanel.width;
 
     var path=new Path2D();
@@ -238,10 +240,17 @@ blocks.renderCblock = function(x,y,blockId,content){
     this.ctx.font = "20px Consolas";
     this.ctx.fillStyle = 'black';
     this.ctx.fillText(block.text,x+5,y+22);
-    var index = 0;
-    content.forEach(function(object){
-        blocks.drawBlock(x - ui.rightPanel.width + 20, y + (blocks.defaultHeight * index) + height,object.data.id);
-        index++;
+    var hIndex = blocks.defaultHeight;
+    content.forEach(function(obj){
+        if ('content' in obj) {
+            blocks.renderCblock(x - ui.rightPanel.width + 20, y + hIndex, obj.data.id, obj.content);
+            hIndex += blocks.defaultHeight;
+            hIndex+=blocks.getHeightC(obj.content);
+            hIndex += blocks.defaultHeight;
+        }else{
+            blocks.drawBlock(x - ui.rightPanel.width + 20, y + hIndex, obj.data.id);
+            hIndex += blocks.defaultHeight;
+        }
     });
 };
 
