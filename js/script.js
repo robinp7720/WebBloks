@@ -6,4 +6,3 @@ blocks.canvas = editor;
 ui.redraw();
 
 blocks.init();
-
