@@ -224,6 +224,15 @@ blocks.mouseMove = function(event) {
     if (blocks.moving === true) {
         var mouseX = event.clientX - ui.rightPanel.width;
         var mouseY = event.clientY;
+        /* Set min mouse posstions */
+        if (mouseX < 1){
+            mouseX = 1;
+        }
+
+        if (mouseY < 1){
+            mouseY = 1;
+        }
+
 
         blocks.scripts[blocks.scripts.length - 1].data.position.x = mouseX;
         blocks.scripts[blocks.scripts.length - 1].data.position.y = mouseY;
