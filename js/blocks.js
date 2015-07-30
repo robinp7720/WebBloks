@@ -144,16 +144,17 @@ blocks.mouseDown = function(event) {
         var mouseX = event.clientX - ui.rightPanel.width;
         var mouseY = event.clientY;
         blocks.render();
-        blocks.scripts.forEach(function (object) {
+        blocks.scripts.forEach(function (object,scriptId) {
             var index = 0;
             var x = object.data.position.x;
             var y = object.data.position.y;
 
             var movingBlocks = [];
+            var new_content = [];
             var addBlocks = false;
 
             var script = object.content;
-            script.forEach(function (object) {
+            script.forEach(function (object,key) {
                 var block_y = y + (blocks.defaultHeight * index);
                 var block_x = x;
                 var height = blocks.defaultHeight;
@@ -167,6 +168,8 @@ blocks.mouseDown = function(event) {
                 }
                 if (addBlocks == true){
                     movingBlocks.push(object);
+                }else{
+                    new_content.push(object);
                 }
             });
 
@@ -183,6 +186,7 @@ blocks.mouseDown = function(event) {
                 newscript.content = movingBlocks;
 
                 blocks.scripts.push(newscript);
+                blocks.scripts[scriptId].content = new_content;
                 blocks.render();
                 blocks.moving = true;
             }
