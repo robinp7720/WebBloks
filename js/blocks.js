@@ -153,6 +153,20 @@ blocks.drawNormalBlock = function(x,y,blockId){
     this.ctx.fillText(block.text,x+5,y+22);
 };
 
+blocks.getHeightC = function(content){
+    var height = 0;
+    content.forEach(function(obj){
+        if (obj.content === undefined){
+            height += blocks.defaultHeight;
+        }else{
+            height += blocks.defaultHeight;
+            height += blocks.getHeightC(obj.content);
+            height += blocks.defaultHeight;
+        }
+    });
+    return height;
+};
+
 blocks.renderCblock = function(x,y,blockId,content){
     this.ctx = this.canvas.ctx;
     var block = this.blocks[blockId];
@@ -160,7 +174,7 @@ blocks.renderCblock = function(x,y,blockId,content){
     var width = (block.text.length+1) * 11;
 
     var height = this.defaultHeight;
-    var contentHeight = height;
+    var contentHeight =this.getHeightC(content);
     x += ui.rightPanel.width;
 
     var path=new Path2D();
@@ -186,11 +200,11 @@ blocks.renderCblock = function(x,y,blockId,content){
     path.lineTo(x+41,y+height+5);
     path.lineTo(x+40,y+height);
 
-    path.lineTo(x+16,y+height);
-    path.lineTo(x+14,y+height + 2);
-    path.lineTo(x+14,y+height+contentHeight-2);
+    path.lineTo(x+22,y+height);
+    path.lineTo(x+20,y+height + 2);
+    path.lineTo(x+20,y+height+contentHeight-2);
 
-    path.lineTo(x+16,y+height+contentHeight);
+    path.lineTo(x+22,y+height+contentHeight);
 
     /* Top puzzle of bottom bar */
     path.lineTo(x+40,y+height+contentHeight);
@@ -211,7 +225,7 @@ blocks.renderCblock = function(x,y,blockId,content){
     path.lineTo(x+20,y+height+contentHeight+height);
 
     path.lineTo(x+2,y+height+contentHeight+height);
-    path.lineTo(x,y+height+contentHeight+height -2);
+    path.lineTo(x,y+height+contentHeight+height - 2);
 
     path.lineTo(x,y+2);
     path.lineTo(x+2,y);
@@ -224,6 +238,11 @@ blocks.renderCblock = function(x,y,blockId,content){
     this.ctx.font = "20px Consolas";
     this.ctx.fillStyle = 'black';
     this.ctx.fillText(block.text,x+5,y+22);
+    var index = 0;
+    content.forEach(function(object){
+        blocks.drawBlock(x - ui.rightPanel.width + 20, y + (blocks.defaultHeight * index) + height,object.data.id);
+        index++;
+    });
 };
 
 blocks.render = function() {
@@ -316,34 +335,36 @@ blocks.mouseMove = function(event) {
 };
 
 blocks.mouseUp = function(event){
-    var mouseX = event.clientX - ui.rightPanel.width;
-    var mouseY = event.clientY;
-    blocks.moving = false;
+    if (blocks.moving) {
+        var mouseX = event.clientX - ui.rightPanel.width;
+        var mouseY = event.clientY;
+        blocks.moving = false;
 
-    ui.drawEditor();
-    blocks.scripts.forEach(function(object,scriptId){
-        var index = 0;
-        var x = object.data.position.x;
-        var y = object.data.position.y;
+        ui.drawEditor();
+        blocks.scripts.forEach(function (object, scriptId) {
+            var index = 0;
+            var x = object.data.position.x;
+            var y = object.data.position.y;
 
-        var script = object.content;
-        script.forEach(function(object,key){
-            var block_y = y + (blocks.defaultHeight * index);
-            var block_x = x;
-            var height = blocks.defaultHeight;
-            var width = (blocks.blocks[object.data.id].text.length + 1) * 11;
-            index++;
-            if (mouseX > block_x && mouseX < block_x + width) {
-                if (mouseY > block_y && mouseY < block_y + height) {
-                    console.log("Block dropped!");
-                    blocks.scripts[blocks.scripts.length - 1].content.forEach(function(object,count){
-                        blocks.scripts[scriptId].content.splice(key+count+1,0,object);
-                    });
-                    delete blocks.scripts[blocks.scripts.length - 1];
+            var script = object.content;
+            script.forEach(function (object, key) {
+                var block_y = y + (blocks.defaultHeight * index);
+                var block_x = x;
+                var height = blocks.defaultHeight;
+                var width = (blocks.blocks[object.data.id].text.length + 1) * 11;
+                index++;
+                if (mouseX > block_x && mouseX < block_x + width) {
+                    if (mouseY > block_y && mouseY < block_y + height) {
+                        console.log("Block dropped!");
+                        blocks.scripts[blocks.scripts.length - 1].content.forEach(function (object, count) {
+                            blocks.scripts[scriptId].content.splice(key + count + 1, 0, object);
+                        });
+                        delete blocks.scripts[blocks.scripts.length - 1];
 
+                    }
                 }
-            }
+            });
         });
-    });
-    blocks.render();
+        blocks.render();
+    }
 };
