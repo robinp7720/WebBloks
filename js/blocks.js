@@ -346,50 +346,43 @@ blocks.mouseDown = function(event) {
             var addBlocks = false;
 
             var script = object.content;
-            script.forEach(function (object,key) {
-                var block_y = y + (blocks.defaultHeight * index);
-                var block_x = x;
-                var height = blocks.defaultHeight;
-                var width = (blocks.blocks[object.data.id].text.length + 1) * 11;
-                index++;
-                if (mouseX > block_x && mouseX < block_x + width) {
-                    if (mouseY > block_y && mouseY < block_y + height) {
-                        console.log("Block clicked!!");
-                        blocks.dragOffset.x = block_x - mouseX;
-                        addBlocks = true;
-                    }
-                }
-                if (addBlocks == true){
-                    movingBlocks.push(object);
-                }else{
-                    new_content.push(object);
-                }
-            });
+            blocks.onClickChild(mouseX, mouseY, x, y, object.content);
 
-            if (addBlocks == true) {
-                var newscript = {
-                    data: {
-                        position: {
-                            x: mouseX,
-                            y: mouseY
-                        }
-                    },
-                    content: []
-                };
-                newscript.content = movingBlocks;
-
-                blocks.scripts.push(newscript);
-                blocks.scripts[scriptId].content = new_content;
-                blocks.render();
-                blocks.moving = true;
-            }
         });
     }
 };
+
+blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
+    var index = 0;
+    content.forEach(function(obj,key){
+        var y = blockY + index;
+        var x = blockX;
+        if ('content' in obj){
+            blocks.onClickChild(mouseX, mouseY, x+20, y + blocks.defaultHeight, obj.content);
+            index += blocks.getHeightC(obj.content);
+            index+= blocks.defaultHeight;
+        }
+
+        var height = blocks.defaultHeight;
+        var width = (blocks.blocks[obj.data.id].text.length + 1) * 11;
+
+        if (mouseX > x && mouseX < x + width) {
+            if (mouseY > y && mouseY < y + height) {
+                console.log("Block clicked!!");
+                console.log(obj);
+            }
+        }
+
+        index+= blocks.defaultHeight;
+
+    });
+};
+
 blocks.mouseMove = function(event) {
+    var mouseX = event.clientX - ui.rightPanel.width + blocks.dragOffset.x;
+    var mouseY = event.clientY - (blocks.defaultHeight / 2);
     if (blocks.moving === true) {
-        var mouseX = event.clientX - ui.rightPanel.width + blocks.dragOffset.x;
-        var mouseY = event.clientY - (blocks.defaultHeight / 2);
+
         /* Set min mouse posstions */
         if (mouseX < 1){
             mouseX = 1;
@@ -404,6 +397,7 @@ blocks.mouseMove = function(event) {
         blocks.scripts[blocks.scripts.length - 1].data.position.y = mouseY;
         blocks.render();
     }
+    //console.log(mouseY);
 };
 
 blocks.mouseUp = function(event){
