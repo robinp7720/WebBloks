@@ -15,6 +15,9 @@ ui.rightPanel.stage.height = 0;
 ui.rightPanel.fileBrowser.width = 0;
 ui.rightPanel.fileBrowser.height = 0;
 
+ui.editorImage = new Image();
+ui.editorImage.src = 'http://www.html5canvastutorials.com/demos/assets/wood-pattern.png';
+
 ui.redraw = function() {
 
     this.ctx = this.canvas.ctx;
@@ -22,11 +25,15 @@ ui.redraw = function() {
     this.canvas.element.width = window.innerWidth -17;
     this.canvas.element.height = window.innerHeight-3;
 
-    this.rightPanel.width = this.canvas.element.width / 5;
+    this.rightPanel.width = 500;
     this.rightPanel.height = this.canvas.element.height;
 
     this.rightPanel.stage.width = this.rightPanel.width;
-    this.rightPanel.stage.height = this.rightPanel.width;
+    if (this.rightPanel.width > window.innerHeight / 2){
+        this.rightPanel.stage.height = window.innerHeight / 2;
+    }else {
+        this.rightPanel.stage.height = this.rightPanel.width;
+    }
 
     this.rightPanel.fileBrowser.height = this.rightPanel.height - this.rightPanel.stage.height;
     this.rightPanel.fileBrowser.width = this.rightPanel.width;
@@ -40,6 +47,15 @@ ui.drawEditor = function() {
     this.ctx.rect(this.rightPanel.width,0, this.canvas.element.width - this.rightPanel.width, this.rightPanel.height);
     this.ctx.fill();
     this.ctx.closePath();
+
+
+    var pattern = ui.ctx.createPattern(ui.editorImage, 'repeat');
+
+    ui.ctx.rect(ui.rightPanel.width,0, ui.canvas.element.width - ui.rightPanel.width, ui.rightPanel.height);
+    ui.ctx.fillStyle = pattern;
+    ui.ctx.fill();
+
+
 };
 
 ui.drawPanels = function() {

@@ -3,6 +3,8 @@ var editor = canvas;
 ui.canvas = editor;
 blocks.canvas = editor;
 
-ui.redraw();
+ui.editorImage.onload = function() {
+    ui.redraw();
 
-blocks.init();
+    blocks.init();
+};
