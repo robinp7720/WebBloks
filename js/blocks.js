@@ -1,4 +1,7 @@
+
 var blocks = {};
+
+blocks.callStack = 0;
 
 blocks.canvas = null;
 blocks.ctx = null;
@@ -65,7 +68,7 @@ blocks.scripts = [
                     {
                         data: {
                             type: 'block', //Block data type
-                            id: 2 //How ever we want to identify blocks
+                            id: 3 //How ever we want to identify blocks
                         },
                         inputs: {
                             1: "test" //Can be a block object or string or what ever data type the input is.
@@ -84,7 +87,7 @@ blocks.scripts = [
             {
                 data: {
                     type: 'block', //Block data type
-                    id: 2 //How ever we want to identify blocks
+                    id: 1 //How ever we want to identify blocks
                 },
                 inputs: {
                     1: "test" //Can be a block object or string or what ever data type the input is.
@@ -345,15 +348,16 @@ blocks.mouseDown = function(event) {
             var movingBlocks = [];
             var new_content = [];
             var addBlocks = false;
-
-            blocks.scripts[scriptId].content = blocks.onClickChild(mouseX, mouseY, x, y, object.content)
-            //console.log(blocks.onClickChild(mouseX, mouseY, x, y, object.content));
+            blocks.callStack = 0;
+            blocks.scripts[scriptId].content = blocks.onClickChild(mouseX, mouseY, x, y, object.content);
+            console.log(blocks.callStack);
 
         });
     }
 };
 
 blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
+    blocks.callStack++;
     var index = 0;
     var nextBlocks = [];
     var addBlocks = false;
@@ -374,7 +378,6 @@ blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
 
         if (mouseX > x && mouseX < x + width) {
             if (mouseY > y && mouseY < y + height) {
-                console.log("Block clicked!!");
                 addBlocks = true;
             }
         }
@@ -386,14 +389,11 @@ blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
         }
 
         index+= blocks.defaultHeight;
-        console.log(newContent);
 
     });
 
     /* Create new script with blocks under clicked block */
     if (addBlocks){
-        console.log(nextBlocks);
-
         var newscript = {
             data: {
                 position: {
@@ -431,7 +431,6 @@ blocks.mouseMove = function(event) {
         blocks.scripts[blocks.scripts.length - 1].data.position.y = mouseY;
         blocks.render();
     }
-    //console.log(mouseY);
 };
 
 blocks.mouseUp = function(event){
@@ -440,31 +439,82 @@ blocks.mouseUp = function(event){
         var mouseY = event.clientY - (blocks.defaultHeight / 2);
         blocks.moving = false;
 
-        ui.drawEditor();
-        blocks.scripts.forEach(function (object, scriptId) {
+
+        blocks.scripts.forEach(function (object,scriptId) {
             var index = 0;
             var x = object.data.position.x;
             var y = object.data.position.y;
 
-            var script = object.content;
-            script.forEach(function (object, key) {
-                var block_y = y + (blocks.defaultHeight * index);
-                var block_x = x;
-                var height = blocks.defaultHeight;
-                var width = (blocks.blocks[object.data.id].text.length + 1) * 11;
-                index++;
-                if (mouseX > block_x && mouseX < block_x + width) {
-                    if (mouseY > block_y && mouseY < block_y + height) {
-                        console.log("Block dropped!");
-                        blocks.scripts[blocks.scripts.length - 1].content.forEach(function (object, count) {
-                            blocks.scripts[scriptId].content.splice(key + count + 1, 0, object);
-                        });
-                        delete blocks.scripts[blocks.scripts.length - 1];
+            var newContent = blocks.findSnap(mouseX, mouseY, x, y, object.content);
 
-                    }
-                }
-            });
+            blocks.scripts[scriptId].content = newContent;
+
+
         });
+
         blocks.render();
     }
+};
+
+blocks.findSnap = function(mouseX, mouseY, blockX, blockY, content) {
+    var index = -1;
+    var nextBlocks = [];
+    var addBlocks = false;
+    var newContent = [];
+    content.forEach(function(obj,key){
+        var y = blockY + index;
+        var x = blockX;
+        if (addBlocks === false) {
+            if ('content' in obj) {
+                obj.content = blocks.findSnap(mouseX, mouseY, x + 20, y + blocks.defaultHeight, obj.content);
+                index += blocks.getHeightC(obj.content);
+                index += blocks.defaultHeight;
+            }
+        }
+
+        var height = blocks.defaultHeight;
+        var width = (blocks.blocks[obj.data.id].text.length + 1) * 11;
+
+        if ('content' in obj){
+            /* If snapping to top of c block */
+            if (mouseX > x && mouseX < x + width) {
+                if (mouseY > y && mouseY < y + height) {
+                    var toSnap = blocks.scripts[blocks.scripts.length - 1].content;
+                    toSnap.forEach(function (object,key) {
+                        obj.content.splice(key,0,object);
+                    });
+                    delete blocks.scripts[blocks.scripts.length - 1];
+                }
+            }
+            newContent.push(obj);
+
+            /* If snapping to bottom of c block */
+            if (mouseX > x && mouseX < x + width) {
+                if (mouseY > y + height && mouseY < y + height + height) {
+                    var toSnap = blocks.scripts[blocks.scripts.length - 1].content;
+                    toSnap.forEach(function (object,key) {
+                        newContent.push(object);
+                    });
+                    delete blocks.scripts[blocks.scripts.length - 1];
+                }
+            }
+        }else {
+            newContent.push(obj);
+
+            if (mouseX > x && mouseX < x + width) {
+                if (mouseY > y && mouseY < y + height) {
+                    var toSnap = blocks.scripts[blocks.scripts.length - 1].content;
+                    toSnap.forEach(function (object) {
+                        newContent.push(object);
+                    });
+                    delete blocks.scripts[blocks.scripts.length - 1];
+                }
+            }
+        }
+
+        index+= blocks.defaultHeight;
+
+    });
+
+    return newContent;
 };
