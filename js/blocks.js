@@ -18,8 +18,8 @@ blocks.dragOffset = {
 blocks.defaultHeight = 30;
 
 blocks.colours = {
-  control: '#ff6666',
-  other: '#66ff66'
+  control: 'dd6666',
+  other: '66dd66'
 };
 
 blocks.blocks = {
@@ -200,7 +200,7 @@ blocks.drawNormalBlock = function(x,y,blockId){
     path.lineTo(x,y+2);
     path.lineTo(x+2,y);
 
-    this.ctx.fillStyle = this.colours[this.blocks[blockId].cat];
+    this.ctx.fillStyle = '#'+this.colours[this.blocks[blockId].cat];
     this.ctx.fill(path);
 
     this.ctx.stroke(path);
@@ -226,7 +226,11 @@ blocks.getHeightC = function(content){
     return height;
 };
 
-blocks.renderCblock = function(x,y,blockId,content){
+blocks.renderCblock = function(x,y,blockId,content,child){
+    if (child == undefined) {
+        child = false;
+    }
+
     this.ctx = this.canvas.ctx;
     var block = this.blocks[blockId];
 
@@ -289,7 +293,12 @@ blocks.renderCblock = function(x,y,blockId,content){
     path.lineTo(x,y+2);
     path.lineTo(x+2,y);
 
-    this.ctx.fillStyle = this.colours[this.blocks[blockId].cat];
+    if (!child) {
+        this.ctx.fillStyle = '#'+this.colours[this.blocks[blockId].cat];
+    }else{
+        this.ctx.fillStyle = '#'+addHexColor(this.colours[this.blocks[blockId].cat], '222222');
+    }
+
     this.ctx.fill(path);
 
     this.ctx.stroke(path);
@@ -300,7 +309,7 @@ blocks.renderCblock = function(x,y,blockId,content){
     var hIndex = blocks.defaultHeight;
     content.forEach(function(obj){
         if ('content' in obj) {
-            blocks.renderCblock(x - ui.rightPanel.width + 20, y + hIndex, obj.data.id, obj.content);
+            blocks.renderCblock(x - ui.rightPanel.width + 20, y + hIndex, obj.data.id, obj.content,!child);
             hIndex += blocks.defaultHeight;
             hIndex+=blocks.getHeightC(obj.content);
             hIndex += blocks.defaultHeight;
