@@ -513,11 +513,12 @@ blocks.findSnap = function(mouseX, mouseY, blockX, blockY, content) {
                 }
             }
         }
-        if (blocks.defaultHeight > 0){
+        if (cBlockHeight > 0){
+            index+= cBlockHeight;
             index+= blocks.defaultHeight;
 
         }
-        index+= cBlockHeight;
+        index+= blocks.defaultHeight;
 
     });
 
