@@ -339,6 +339,7 @@ blocks.mouseDown = function(event) {
     if (blocks.moving === false) {
         var mouseX = event.clientX - ui.rightPanel.width;
         var mouseY = event.clientY;
+
         blocks.render();
         blocks.scripts.forEach(function (object,scriptId) {
             var index = 0;
@@ -379,6 +380,7 @@ blocks.onClickChild = function(mouseX, mouseY, blockX, blockY, content) {
         if (mouseX > x && mouseX < x + width) {
             if (mouseY > y && mouseY < y + height) {
                 addBlocks = true;
+                blocks.dragOffset.x = x-mouseX;
             }
         }
 
@@ -457,18 +459,18 @@ blocks.mouseUp = function(event){
 };
 
 blocks.findSnap = function(mouseX, mouseY, blockX, blockY, content) {
-    var index = -1;
+    var index = 0;
     var nextBlocks = [];
     var addBlocks = false;
     var newContent = [];
     content.forEach(function(obj,key){
         var y = blockY + index;
         var x = blockX;
+        var cBlockHeight = 0;
         if (addBlocks === false) {
             if ('content' in obj) {
                 obj.content = blocks.findSnap(mouseX, mouseY, x + 20, y + blocks.defaultHeight, obj.content);
-                index += blocks.getHeightC(obj.content);
-                index += blocks.defaultHeight;
+                cBlockHeight += blocks.getHeightC(obj.content);
             }
         }
 
@@ -490,7 +492,7 @@ blocks.findSnap = function(mouseX, mouseY, blockX, blockY, content) {
 
             /* If snapping to bottom of c block */
             if (mouseX > x && mouseX < x + width) {
-                if (mouseY > y + height && mouseY < y + height + height) {
+                if (mouseY > y + cBlockHeight+ height && mouseY < y + height + cBlockHeight+ height) {
                     var toSnap = blocks.scripts[blocks.scripts.length - 1].content;
                     toSnap.forEach(function (object,key) {
                         newContent.push(object);
@@ -511,8 +513,11 @@ blocks.findSnap = function(mouseX, mouseY, blockX, blockY, content) {
                 }
             }
         }
+        if (blocks.defaultHeight > 0){
+            index+= blocks.defaultHeight;
 
-        index+= blocks.defaultHeight;
+        }
+        index+= cBlockHeight;
 
     });
 
