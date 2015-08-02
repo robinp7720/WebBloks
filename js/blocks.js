@@ -83,7 +83,8 @@ blocks.init = function() {
     document.addEventListener('mousedown',this.mouseDown);
     document.addEventListener('mousemove',this.mouseMove);
     document.addEventListener('mouseup',this.mouseUp);
-    this.render();
+    //this.render();
+    console.log(this.getHeight(2));
 };
 blocks.drawBlock = function(x,y,blockId){
     this.drawNormalBlock(x,y,blockId);
@@ -136,13 +137,35 @@ blocks.drawNormalBlock = function(x,y,blockId){
 
 blocks.getHeight = function(blockId) {
     var height = 0;
-    if (this.isType(blockId,'c')){
-        var done = false;
-        while (!done) {
 
+    var done = false;
+    var toScan = [];
+    toScan.push(blockId);
+    while (!done) {
+        var allScanned = true;
+        for (var q = 0; q < toScan.length; q++) {
+            var currentId = toScan[q];
+            console.log("Scanning key " + currentId + " now");
+            for (var i = 1;i <= Object.size(blocks.placedBlocks); i++) {
+                console.log("Check if " + i + " matches");
+                var scanBlock = blocks.placedBlocks[i];
+                console.log(scanBlock);
+                if (scanBlock.parent == currentId){
+                    console.log("Found "+i);
+                    if (toScan.indexOf(i) === -1) {
+                        allScanned = false;
+                        toScan.push(i)
+                    }
+                }
+            }
+        }
+        console.log(allScanned);
+        if (allScanned == true) {
+            done = true;
         }
     }
-    return height;
+
+    return toScan;
 };
 
 blocks.amountOfChildren = function(blockId) {
