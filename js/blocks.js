@@ -5,7 +5,7 @@ blocks.callStack = 0;
 
 blocks.canvas = null;
 blocks.ctx = null;
-blocks.style = {}
+blocks.style = {};
 blocks.style.puzzle = {};
 blocks.style.puzzle.width = 20;
 
@@ -67,8 +67,8 @@ blocks.placedBlocks = {
     2: {
         scriptId: 1,
         parent:0, // 0 for script else a block ID for a c block
-        block: 1,
-        nth: 4
+        block: 4,
+        nth: 1
     },
     3: {
         scriptId: 1,
@@ -138,6 +138,13 @@ blocks.drawNormalBlock = function(x,y,blockId){
 blocks.getHeight = function(blockId) {
     var height = 0;
 
+    if (this.isType(blockId,'c')) {
+        height += this.defaultHeight * 2;
+        console.log("is C");
+    }else{
+        height += this.defaultHeight;
+    }
+
     var done = false;
     var toScan = [];
     toScan.push(blockId);
@@ -153,6 +160,13 @@ blocks.getHeight = function(blockId) {
                 if (scanBlock.parent == currentId){
                     console.log("Found "+i);
                     if (toScan.indexOf(i) === -1) {
+
+                        if (this.isType(i,'c')) {
+                            height += this.defaultHeight * 2;
+                        }else{
+                            height += this.defaultHeight;
+                        }
+
                         allScanned = false;
                         toScan.push(i)
                     }
@@ -165,7 +179,7 @@ blocks.getHeight = function(blockId) {
         }
     }
 
-    return toScan;
+    return height;
 };
 
 blocks.amountOfChildren = function(blockId) {
@@ -288,8 +302,14 @@ blocks.getBlockIn = function(parentId,scriptId) {
     for (var blockId in blocks.placedBlocks) {
         if (blocks.placedBlocks.hasOwnProperty(blockId)) {
             var block = blocks.placedBlocks[blockId];
-            if (block.scriptId == scriptId && block.parent == parentId) {
-                placedBlocks.push(block);
+            if (scriptId == undefined){
+                if (block.parent == parentId) {
+                    placedBlocks.push(block);
+                }
+            }else {
+                if (block.scriptId == scriptId && block.parent == parentId) {
+                    placedBlocks.push(block);
+                }
             }
         }
     }
