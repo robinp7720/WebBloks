@@ -62,19 +62,29 @@ blocks.placedBlocks = {
         scriptId: 1,
         parent:0, // 0 for script else a block ID for a c block
         block: 1,
-        nth: 0
+        nth: 0,
+        thisBlockId: 1
     },
     2: {
         scriptId: 1,
         parent:0, // 0 for script else a block ID for a c block
         block: 4,
-        nth: 1
+        nth: 1,
+        thisBlockId: 2
     },
     3: {
         scriptId: 1,
         parent:2, // 0 for script else a block ID for a c block
         block: 1,
-        nth: 0
+        nth: 0,
+        thisBlockId: 3
+    },
+    4: {
+        scriptId: 1,
+        parent:0, // 0 for script else a block ID for a c block
+        block: 1,
+        nth: 2,
+        thisBlockId: 4
     },
 };
 
@@ -85,6 +95,7 @@ blocks.init = function() {
     document.addEventListener('mouseup',this.mouseUp);
     //this.render();
     console.log(this.getHeight(2));
+    this.render();
 };
 blocks.drawBlock = function(x,y,blockId){
     this.drawNormalBlock(x,y,blockId);
@@ -200,7 +211,7 @@ blocks.isType = function(blockId,type){
     return blocks.blocks[block.block].type == type;
 };
 
-blocks.renderCblock = function(x,y,blockId,content,innerHeight){
+blocks.renderCblock = function(x,y,blockId,innerHeight){
     this.ctx = this.canvas.ctx;
     var block = this.blocks[blockId];
 
@@ -208,10 +219,7 @@ blocks.renderCblock = function(x,y,blockId,content,innerHeight){
 
     var topBarHeight = this.defaultHeight;
     var bottomBarHeight = this.defaultHeight;
-    
-    if (innerHeight < 1) {
-        innerHeight = this.defaultHeight;
-    }
+
     x += ui.rightPanel.width;
 
     var path=new Path2D();
@@ -283,14 +291,32 @@ blocks.render = function() {
     for (var key in blocks.scripts) {
         if (blocks.scripts.hasOwnProperty(key)) {
             var script = blocks.scripts[key],
-                content = this.getBlockIn(0, key),
-                x = script.position.x,
-                y = script.position.y;
+                content = this.getBlockIn(0, key);
 
-            var done = false;
+            console.log("Script conent:");
+            console.log(content);
+
+            var done = false,
+                current_x = script.data.position.x,
+                current_y = script.data.position.y;
+
+            var currentBlockId = 0;
+
+            var renderBlocks = {};
 
             while (done==false) {
-
+                for (var i = 0; i < content.length; i++) {
+                    console.log(i);
+                    if (blocks.isType(content[i].thisBlockId,"c")){
+                        blocks.renderCblock(current_x,current_y,content[i].block,blocks.getHeight(content[i].thisBlockId)-(blocks.defaultHeight*2));
+                    }else{
+                        blocks.drawNormalBlock(current_x,current_y,content[i].block);
+                    }
+                    current_y += blocks.getHeight(content[i].thisBlockId)
+                }
+                if (ObjisEmpty(renderBlocks)){
+                    done = true;
+                }
             }
 
         }

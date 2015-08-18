@@ -4,6 +4,15 @@ function addHexColor(c1, c2) {
     return hexStr;
 }
 
+function ObjisEmpty(obj) {
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop))
+            return false;
+    }
+
+    return true;
+}
+
 Object.size = function(obj) {
     var size = 0, key;
     for (key in obj) {
